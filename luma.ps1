@@ -13,7 +13,12 @@ $xd = @('steamapps', 'userdata', 'config', 'logs', 'dumps', 'appcache', 'depotca
 $xf = @('*.log', 'ssfn*', 'steam.cfg', 'DLLInjector.*', 'GreenLuma*')
 
 function Stop-SteamStuff {
-    Get-Process DLLInjector, steam, steamwebhelper, dota2 -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
+    for ($t = 0; $t -lt 20; $t++) {
+        $p = Get-Process DLLInjector, steam, steamwebhelper, dota2 -ErrorAction SilentlyContinue
+        if (-not $p) { break }
+        $p | Stop-Process -Force -ErrorAction SilentlyContinue
+        Start-Sleep 1
+    }
     Start-Sleep 2
 }
 
@@ -33,8 +38,15 @@ function Move-Set($fromRoot, $toRoot) {
 
 function Copy-Client($from, $to) {
     New-Item -ItemType Directory -Force $to | Out-Null
-    & robocopy $from $to /E /IS /IT /R:2 /W:2 /NFL /NDL /NJH /NJS /NP /XD @xd /XF @xf | Out-Null
-    return ($LASTEXITCODE -lt 8)
+    $log = Join-Path $env:TEMP 'luma-robocopy.log'
+    & robocopy $from $to /E /IS /IT /R:3 /W:2 /NP /NFL /NDL /XD @xd /XF @xf /LOG:$log | Out-Null
+    $ok = ($LASTEXITCODE -lt 8)
+    if (-not $ok) {
+        Write-Host 'Locked/failed files:' -ForegroundColor Red
+        Select-String -Path $log -Pattern 'ERROR \d+' | % { ($_.Line -split 'File ')[-1] } | sort -Unique | % { Write-Host "  $_" -ForegroundColor Red }
+        Write-Host 'Close the programs using Steam files (overlay in browsers/Discord) and run the command again.' -ForegroundColor Yellow
+    }
+    return $ok
 }
 
 switch ($cmd) {
