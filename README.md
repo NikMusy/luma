@@ -16,7 +16,13 @@
 
 Тайник: `%USERPROFILE%\.luma-stash`. Копия клиента занимает 1–2 ГБ; игры, профиль, кэши и `ssfn*` не затрагиваются.
 
-## Установка
+## Окно с кнопкой (luma-gui.exe)
+
+Скачай `luma-gui.exe` из [Releases](../../releases): одна большая кнопка ВКЛ/ВЫКЛ, как в VPN-клиенте. Скрипт `luma.ps1` уже встроен внутрь exe, больше ничего не нужно. После переключения окно может само запустить Steam (с инжектором при ВКЛ, обычным при ВЫКЛ). Если Dota запущена, попросит подтверждение.
+
+Сборка из исходников: `csc /target:winexe /codepage:65001 /resource:luma.ps1,luma.ps1 /reference:System.Windows.Forms.dll /reference:System.Drawing.dll luma-gui.cs` (csc лежит в `C:\Windows\Microsoft.NET\Framework64\v4.0.30319`).
+
+## Установка командной строки
 
 1. Скопируй `luma.ps1` и `luma.cmd` в любую папку из PATH (например `%USERPROFILE%\bin`).
 2. Поправь пути `$steam` и `$stash` в начале `luma.ps1`, если у тебя Steam или профиль в другом месте.
